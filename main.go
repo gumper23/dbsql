@@ -26,12 +26,20 @@ func main() {
 	fmt.Printf("%+v\n", rs)
 	fmt.Printf("%s:%s\n", rs[0]["Master_Host"], rs[0]["Master_Port"])
 
+	rs, err = GetResultset(db, "select * from steam.game")
+	if err != nil {
+		log.Fatalf("%s\n", err.Error())
+	}
+	for _, row := range rs {
+		fmt.Printf("%v\n", row)
+	}
+
 }
 
 // GetResultset returns a slice of string->interfaces.
 func GetResultset(db *sql.DB, query string) (resultset []map[string]interface{}, err error) {
 	// Execute the query.
-	rows, err := db.Query(query) // Note: Ignoring errors for brevity
+	rows, err := db.Query(query)
 	if err != nil {
 		return
 	}
