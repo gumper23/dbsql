@@ -2,11 +2,11 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gumper23/sql/rs"
 )
 
 func main() {
@@ -22,63 +22,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("%s\n", err.Error())
 	}
-	rs, err := GetResultset(db, "show slave status")
+
+	var rs rs.Resultset
+	err = rs.QueryRows(db, "show slave status")
 	if err != nil {
 		log.Fatalf("%s\n", err.Error())
 	}
-	fmt.Printf("%+v\n", rs)
-	fmt.Printf("%s:%s\n", rs[0]["Master_Host"], rs[0]["Master_Port"])
+	rs.Vprint()
 
-	rs, err = GetResultset(db, "select * from steam.game")
+	err = rs.QueryRows(db, "select app_id, name, playtime_forever, created_at from steam.game order by playtime_forever desc limit 10")
 	if err != nil {
 		log.Fatalf("%s\n", err.Error())
 	}
-	for _, row := range rs {
-		fmt.Printf("%s\n", row["name"])
-	}
-
-}
-
-// GetResultset returns a slice of string->interfaces.
-func GetResultset(db *sql.DB, query string) (resultset []map[string]interface{}, err error) {
-	// Execute the query.
-	rows, err := db.Query(query)
-	if err != nil {
-		return
-	}
-	defer rows.Close()
-
-	cols, err := rows.Columns()
-	if err != nil {
-		return
-	}
-
-	resultset = make([]map[string]interface{}, 0)
-	for rows.Next() {
-		// Create a slice of interface{}'s to represent each column,
-		// and a second slice to contain pointers to each item in the columns slice.
-		columns := make([]interface{}, len(cols))
-		columnPointers := make([]interface{}, len(cols))
-
-		for i := 0; i < len(columns); i++ {
-			columnPointers[i] = &columns[i]
-		}
-
-		// Scan the result into the column pointers...
-		if err := rows.Scan(columnPointers...); err != nil {
-			return nil, err
-		}
-
-		// Create our map, and retrieve the value for each column from the pointers slice,
-		// storing it in the map with the name of the column as the key.
-		m := make(map[string]interface{})
-		for i, colName := range cols {
-			val := columnPointers[i].(*interface{})
-			m[colName] = *val
-		}
-
-		resultset = append(resultset, m)
-	}
-	err = rows.Err()
-	return
+	rs.Hprint()
 }
