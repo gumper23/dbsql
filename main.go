@@ -4,12 +4,15 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
-	db, err := sql.Open("mysql", "rsmith:***REMOVED***@tcp(127.0.0.1:13306)/information_schema")
+	user := os.Getenv("MYSQL_USERNAME")
+	pass := os.Getenv("MYSQL_PASSWORD")
+	db, err := sql.Open("mysql", user+":"+pass+"@tcp(127.0.0.1:13306)/information_schema")
 	if err != nil {
 		log.Fatalf("%s\n", err.Error())
 	}
