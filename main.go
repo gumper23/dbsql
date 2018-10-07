@@ -31,7 +31,7 @@ func main() {
 		log.Fatalf("%s\n", err.Error())
 	}
 	for _, row := range rs {
-		fmt.Printf("%v\n", row)
+		fmt.Printf("%s\n", row["name"])
 	}
 
 }
@@ -73,9 +73,6 @@ func GetResultset(db *sql.DB, query string) (resultset []map[string]interface{},
 			val := columnPointers[i].(*interface{})
 			m[colName] = *val
 		}
-
-		// Outputs: map[columnName:value columnName2:value2 columnName3:value3 ...]
-		fmt.Print(m)
 
 		resultset = append(resultset, m)
 	}
